@@ -2,10 +2,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/widgets/premium_ui.dart';
 import '../../../home/presentation/pages/home_screen.dart';
 
 class BookAppointmentScreen extends StatefulWidget {
-  const BookAppointmentScreen({super.key});
+  final String? initialDoctorName;
+  final String? initialSpecialtyName;
+
+  const BookAppointmentScreen({
+    super.key,
+    this.initialDoctorName,
+    this.initialSpecialtyName,
+  });
 
   @override
   State<BookAppointmentScreen> createState() => _BookAppointmentScreenState();
@@ -54,9 +62,30 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
         .where('isVerified', isEqualTo: true)
         .get();
 
+    final loadedDoctors = snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+    Map<String, dynamic>? initialDoctor;
+    if (widget.initialDoctorName != null) {
+      for (final doctor in loadedDoctors) {
+        if (doctor['fullName']?.toString() == widget.initialDoctorName) {
+          initialDoctor = doctor;
+          break;
+        }
+      }
+    }
+
     setState(() {
-      _doctors = snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+      _doctors = loadedDoctors;
+      if (initialDoctor != null) {
+        _selectedDoctor = initialDoctor['fullName']?.toString();
+        _selectedSpecialty = widget.initialSpecialtyName ?? initialDoctor['specialtyName']?.toString();
+        _doctorImageUrl = initialDoctor['profileImageUrl']?.toString() ?? initialDoctor['photoURL']?.toString();
+      }
     });
+
+    final doctorId = initialDoctor?['uid']?.toString();
+    if (doctorId != null && doctorId.isNotEmpty) {
+      await _loadDoctorWorkplaces(doctorId);
+    }
   }
 
   Future<void> _loadDoctorWorkplaces(String doctorId) async {
@@ -296,8 +325,9 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          : PremiumGradientBackground(
+              child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
         child: Column(
           children: [
             _buildDropdownCard(
@@ -421,11 +451,11 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                     ],
                   ),
                   if (_selectedDate != null && _availableTimes[_selectedWorkplace]?.isEmpty == true)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 8.0),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
                       child: Text(
                         'لا توجد أوقات متاحة في هذا التاريخ',
-                        style: TextStyle(color: Colors.red),
+                        style: TextStyle(color: theme.colorScheme.error),
                       ),
                     ),
                 ],
@@ -448,9 +478,12 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
 
             const SizedBox(height: 32),
 
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
+            PremiumSurface(
+              padding: const EdgeInsets.all(8),
+              radius: 24,
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
                 icon: const Icon(Icons.check_circle_outline),
                 label: const Text('تأكيد الحجز والدفع'),
                 onPressed: isFormComplete ? _confirmBooking : null,
@@ -461,9 +494,11 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                 ),
               ),
             ),
+            ),
           ],
         ),
       ),
+            ),
     );
   }
 
@@ -476,8 +511,8 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
       value: _selectedTime,
       decoration: InputDecoration(
         labelText: 'الوقت',
-        prefixIcon: const Icon(Icons.access_time),
-        border: const OutlineInputBorder(),
+        prefixIcon: Icon(Icons.access_time, color: Theme.of(context).colorScheme.primary),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),
         enabled: times.isNotEmpty,
       ),
       items: times.map((timeStr) {
@@ -503,8 +538,8 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
       value: value,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon),
-        border: const OutlineInputBorder(),
+        prefixIcon: Icon(icon, color: Theme.of(context).colorScheme.primary),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),
       ),
       items: items
           .map((item) => DropdownMenuItem<T>(value: item, child: Text(item.toString())))
@@ -514,35 +549,31 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
   }
 
   Widget _buildDropdownCard({required String title, required List<Widget> children}) {
-    final theme = Theme.of(context);
-    return Card(
-      elevation: 0,
-      color: theme.cardColor,
+    return PremiumSurface(
       margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22), side: BorderSide(color: theme.dividerColor.withOpacity(0.25))),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: theme.colorScheme.onSurface)),
-            const SizedBox(height: 12),
-            ...children,
-          ],
-        ),
+      radius: 28,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          PremiumSectionHeader(
+            title: title,
+            subtitle: 'خطوة مصممة لتسهيل الحجز بسرعة ووضوح',
+            icon: Icons.auto_awesome_rounded,
+          ),
+          const SizedBox(height: 16),
+          ...children,
+        ],
       ),
     );
   }
 
   Widget _buildDoctorDetails(Map<String, dynamic> doctor) {
     final theme = Theme.of(context);
-    return Card(
-      elevation: 0,
-      color: theme.cardColor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22), side: BorderSide(color: theme.dividerColor.withOpacity(0.25))),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
+    return PremiumSurface(
+      margin: const EdgeInsets.only(top: 4),
+      padding: const EdgeInsets.all(16),
+      radius: 28,
+      child: Row(
           children: [
             CircleAvatar(
               radius: 32,
@@ -558,19 +589,19 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                   Text(doctor['fullName'],
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface)),
                   Text(doctor['specialtyName'] ?? '',
-                      style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
+                      style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(.64))),
                   const SizedBox(height: 4),
                   if (doctor['rating'] != null)
                     Row(
                       children: [
-                        const Icon(Icons.star, size: 16, color: Colors.amber),
+                        Icon(Icons.star, size: 16, color: theme.colorScheme.tertiary),
                         Text(doctor['rating'].toString()),
                       ],
                     ),
                   if (doctor['specialty'] != null)
                     Text(
                       doctor['specialty'],
-                      style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
+                      style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface.withOpacity(.64)),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -579,7 +610,6 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
             ),
           ],
         ),
-      ),
     );
   }
 

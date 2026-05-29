@@ -162,7 +162,7 @@ class _InstantConsultationScreenState extends State<InstantConsultationScreen> {
         ),
         title: Text(doctor.fullName, style: TextStyle(fontWeight: FontWeight.w900, color: colorScheme.onSurface)),
         subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(doctor.specialtyName ?? 'تخصص عام', style: TextStyle(color: colorScheme.onSurfaceVariant)),
+          Text(doctor.specialtyName ?? 'تخصص عام', style: TextStyle(color: colorScheme.onSurface.withOpacity(.64))),
           const SizedBox(height: 4),
           Row(children: [
             const Icon(Icons.star, color: Colors.amber, size: 16),

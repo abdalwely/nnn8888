@@ -25,7 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Color get _primary => Theme.of(context).colorScheme.primary;
   Color get _primaryDark => Theme.of(context).colorScheme.primary.withOpacity(0.85);
   Color get _text => Theme.of(context).colorScheme.onSurface;
-  Color get _muted => Theme.of(context).colorScheme.onSurfaceVariant;
+  Color get _muted => Theme.of(context).colorScheme.onSurface.withOpacity(.64);
   Color get _cardBorder => Theme.of(context).dividerColor.withOpacity(0.35);
   Color get _profileCardColor => Theme.of(context).cardColor;
 
@@ -412,7 +412,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.35),
+        color: Color.lerp(Theme.of(context).colorScheme.primaryContainer, Theme.of(context).colorScheme.secondaryContainer, .35)!.withOpacity(0.38),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: _cardBorder),
       ),
@@ -434,7 +434,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.35),
+        color: Color.lerp(Theme.of(context).colorScheme.primaryContainer, Theme.of(context).colorScheme.secondaryContainer, .35)!.withOpacity(0.38),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: _cardBorder),
       ),

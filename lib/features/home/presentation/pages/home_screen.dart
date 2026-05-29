@@ -4,6 +4,8 @@ import 'package:digl/features/consultations/presentation/pages/instant_consultat
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/widgets/modern_bottom_nav_bar.dart';
+import '../../../../core/widgets/premium_ui.dart';
 import '../../../../core/widgets/upcoming_appointments_widget.dart';
 import '../../../../services/appointment_service.dart';
 import '../../../../services/health_News_Service.dart';
@@ -219,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     return AppBar(
-      backgroundColor: colorScheme.surface,
+      backgroundColor: Colors.transparent,
       elevation: 0,
       scrolledUnderElevation: 0,
       title: Text(
@@ -235,8 +237,16 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               margin: const EdgeInsetsDirectional.only(end: 8, top: 6, bottom: 6),
               decoration: BoxDecoration(
-                color: colorScheme.primaryContainer.withOpacity(0.55),
-                borderRadius: BorderRadius.circular(14),
+                color: Color.lerp(colorScheme.primaryContainer, colorScheme.secondaryContainer, .35)!.withOpacity(0.78),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.35)),
+                boxShadow: [
+                  BoxShadow(
+                    color: colorScheme.shadow.withOpacity(0.08),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
               child: IconButton(
                 icon: Icon(Icons.notifications_none_rounded, color: colorScheme.primary),
@@ -287,18 +297,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: _currentIndex == 0 ? buildAppBar() : null,
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              colorScheme.primaryContainer.withOpacity(theme.brightness == Brightness.dark ? 0.08 : 0.18),
-              theme.scaffoldBackgroundColor,
-              theme.scaffoldBackgroundColor,
-            ],
-          ),
-        ),
+      body: PremiumGradientBackground(
         child: IndexedStack(
           index: _currentIndex,
           children: [
@@ -335,47 +334,22 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          boxShadow: [
-            BoxShadow(
-              color: theme.shadowColor.withOpacity(0.12),
-              blurRadius: 20,
-              offset: const Offset(0, -6),
-            ),
-          ],
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(22),
-            topRight: Radius.circular(22),
+      extendBody: true,
+      bottomNavigationBar: ModernBottomNavBar(
+        currentIndex: _currentIndex,
+        onTap: (index) => setState(() => _currentIndex = index),
+        items: [
+          const BottomNavItem(icon: Icons.home_rounded, label: 'الرئيسية'),
+          const BottomNavItem(icon: Icons.calendar_month_rounded, label: 'المواعيد'),
+          const BottomNavItem(icon: Icons.auto_awesome_rounded, label: 'استشارة'),
+          BottomNavItem(
+            icon: currentUserModel!.isPatient
+                ? Icons.medication_liquid_rounded
+                : Icons.fact_check_rounded,
+            label: currentUserModel!.isPatient ? 'الأدوية' : 'الطلبات',
           ),
-        ),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(22),
-            topRight: Radius.circular(22),
-          ),
-          child: NavigationBar(
-            backgroundColor: colorScheme.surface,
-            selectedIndex: _currentIndex,
-            onDestinationSelected: (index) => setState(() => _currentIndex = index),
-            indicatorColor: colorScheme.primaryContainer.withOpacity(0.7),
-            labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-            animationDuration: const Duration(milliseconds: 350),
-            destinations: [
-              const NavigationDestination(icon: Icon(Icons.home_rounded), label: 'الرئيسية'),
-              const NavigationDestination(icon: Icon(Icons.calendar_month_rounded), label: 'المواعيد'),
-              const NavigationDestination(icon: Icon(Icons.chat_bubble_rounded), label: 'استشارة'),
-              NavigationDestination(
-                icon: Icon(currentUserModel!.isPatient
-                    ? Icons.medication_liquid_rounded
-                    : Icons.fact_check_rounded),
-                label: currentUserModel!.isPatient ? 'الأدوية' : 'الطلبات',
-              ),
-              const NavigationDestination(icon: Icon(Icons.person_rounded), label: 'حسابي'),
-            ],
-          ),
-        ),
+          const BottomNavItem(icon: Icons.person_rounded, label: 'حسابي'),
+        ],
       ),
     );
   }
@@ -402,43 +376,102 @@ class WelcomeMoodSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            colorScheme.primary,
-            colorScheme.primary.withOpacity(0.8),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-              color: colorScheme.primary.withOpacity(0.2),
-              blurRadius: 10,
-              offset: const Offset(0, 4))
+    return PremiumSurface(
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 18),
+      padding: const EdgeInsets.all(22),
+      radius: 32,
+      gradient: LinearGradient(
+        begin: Alignment.topRight,
+        end: Alignment.bottomLeft,
+        colors: [
+          colorScheme.primary.withOpacity(theme.brightness == Brightness.dark ? .42 : .92),
+          colorScheme.secondary.withOpacity(theme.brightness == Brightness.dark ? .22 : .72),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          Text(
-            userType == 'patient' ? "مرحباً، $userName" : "مرحباً، دكتور $userName",
-            style: TextStyle(color: colorScheme.onPrimary, fontSize: 24, fontWeight: FontWeight.w900),
+          PositionedDirectional(
+            end: -18,
+            top: -18,
+            child: Icon(
+              Icons.blur_on_rounded,
+              size: 118,
+              color: colorScheme.onPrimary.withOpacity(.08),
+            ),
           ),
-          const SizedBox(height: 8),
-          Text("كيف تشعر اليوم؟", style: TextStyle(color: colorScheme.onPrimary.withOpacity(0.82), fontSize: 16)),
-          const SizedBox(height: 16),
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildMoodButton(Icons.sentiment_very_satisfied, "ممتاز", theme),
-              const SizedBox(width: 8),
-              _buildMoodButton(Icons.sentiment_satisfied, "جيد", theme),
-              const SizedBox(width: 8),
-              _buildMoodButton(Icons.sentiment_neutral, "عادي", theme),
-              const SizedBox(width: 8),
-              _buildMoodButton(Icons.sentiment_dissatisfied, "سيء", theme),
+              Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: colorScheme.onPrimary.withOpacity(.14),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: colorScheme.onPrimary.withOpacity(.18)),
+                    ),
+                    child: Icon(Icons.health_and_safety_rounded, color: colorScheme.onPrimary),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          userType == 'patient' ? "مرحباً، $userName" : "مرحباً، دكتور $userName",
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            color: colorScheme.onPrimary,
+                            fontWeight: FontWeight.w900,
+                            height: 1.1,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "مساعدك الصحي الذكي جاهز لمتابعة يومك",
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onPrimary.withOpacity(.82),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: colorScheme.onPrimary.withOpacity(.10),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: colorScheme.onPrimary.withOpacity(.14)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "كيف تشعر اليوم؟",
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: colorScheme.onPrimary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        _buildMoodButton(Icons.sentiment_very_satisfied_rounded, "ممتاز", theme),
+                        const SizedBox(width: 8),
+                        _buildMoodButton(Icons.sentiment_satisfied_rounded, "جيد", theme),
+                        const SizedBox(width: 8),
+                        _buildMoodButton(Icons.sentiment_neutral_rounded, "عادي", theme),
+                        const SizedBox(width: 8),
+                        _buildMoodButton(Icons.sentiment_dissatisfied_rounded, "سيء", theme),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ],
@@ -452,19 +485,19 @@ class WelcomeMoodSection extends StatelessWidget {
     return Expanded(
       child: ElevatedButton.icon(
         onPressed: () => onMoodSelected(label),
-        icon: Icon(icon, color: isSelected ? colorScheme.onPrimary : colorScheme.primary),
+        icon: Icon(icon, color: isSelected ? colorScheme.primary : colorScheme.onPrimary),
         label: Text(
           label,
           style: TextStyle(
-            color: isSelected ? colorScheme.onPrimary : colorScheme.primary,
+            color: isSelected ? colorScheme.primary : colorScheme.onPrimary,
             fontSize: 14,
           ),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: isSelected ? colorScheme.primary : colorScheme.surface,
+          backgroundColor: isSelected ? colorScheme.onPrimary : colorScheme.onPrimary.withOpacity(0.12),
           padding: const EdgeInsets.symmetric(vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          side: isSelected ? null : BorderSide(color: colorScheme.primary),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          side: BorderSide(color: colorScheme.onPrimary.withOpacity(isSelected ? 0 : .24)),
         ),
       ),
     );
