@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:digl/core/config/medical_theme.dart';
 import 'package:digl/core/config/theme_provider.dart';
 import 'package:digl/core/config/theme_helper.dart';
+import 'package:digl/core/widgets/premium_ui.dart';
 import 'package:digl/services/user_role_service.dart';
 import 'package:digl/services/logout_service.dart';
 import 'package:digl/features/settings/presentation/pages/health_assessment_screen.dart';
@@ -237,11 +238,12 @@ class _SettingsScreenState extends State<SettingsScreen>
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : FadeTransition(
+          : PremiumGradientBackground(
+              child: FadeTransition(
         opacity: Tween<double>(begin: 0, end: 1)
             .animate(_animationController),
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
           children: [
             // ✅ قسم معلومات الحساب
             _buildAccountInfoSection(),
@@ -265,6 +267,7 @@ class _SettingsScreenState extends State<SettingsScreen>
           ],
         ),
       ),
+            ),
     );
   }
 
@@ -373,25 +376,25 @@ class _SettingsScreenState extends State<SettingsScreen>
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: MedicalTheme.primaryMedicalBlue.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: MedicalTheme.primaryMedicalBlue.withOpacity(0.3),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
                 ),
               ),
-              child: const Row(
+              child: Row(
                 children: [
                   Icon(
                     Icons.info,
-                    color: MedicalTheme.primaryMedicalBlue,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       'أجب على أسئلة ذكية عن أعراضك وحالتك الصحية للحصول على تقييم أولي والحصول على توصيات طبية',
                       style: TextStyle(
                         fontSize: 12,
-                        color: MedicalTheme.primaryMedicalBlue,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ),
@@ -555,7 +558,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                     _enableNotifications
                         ? Icons.notifications_active
                         : Icons.notifications_off,
-                    color: MedicalTheme.primaryMedicalBlue,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                   title: const Text('تفعيل الإخطارات'),
                   trailing: Switch(
@@ -635,10 +638,10 @@ class _SettingsScreenState extends State<SettingsScreen>
 
             // تسجيل الخروج
             ListTile(
-              leading: const Icon(Icons.logout, color: MedicalTheme.dangerRed),
-              title: const Text(
+              leading: Icon(Icons.logout, color: Theme.of(context).colorScheme.error),
+              title: Text(
                 'تسجيل الخروج',
-                style: TextStyle(color: MedicalTheme.dangerRed),
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
               onTap: _logout,
@@ -659,13 +662,13 @@ class _SettingsScreenState extends State<SettingsScreen>
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Theme.of(context).brightness == Brightness.dark
-            ? MedicalTheme.darkGray800
-            : MedicalTheme.lightGray100,
+            ? Theme.of(context).colorScheme.surfaceContainerHighest
+            : Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(.55),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
-          Icon(icon, color: MedicalTheme.primaryMedicalBlue),
+          Icon(icon, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -674,7 +677,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                 label,
                 style: const TextStyle(
                   fontSize: 12,
-                  color: Colors.grey,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 4),
