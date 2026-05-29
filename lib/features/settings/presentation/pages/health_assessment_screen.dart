@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:digl/core/config/medical_theme.dart';
 import 'package:digl/core/config/theme_helper.dart';
+import 'package:digl/features/appointments/presentation/pages/book_appointment_screen.dart';
+import 'package:digl/features/consultations/presentation/pages/consultation_screen.dart';
 import 'package:digl/features/medical_profile/models/doctor_recommendation_model.dart';
 import 'package:digl/features/medical_profile/models/health_profile_model.dart';
 import 'package:digl/features/medical_profile/presentation/pages/ai_symptom_questions_screen.dart';
@@ -480,6 +482,98 @@ class _HealthAssessmentScreenState extends State<HealthAssessmentScreen>
     );
   }
 
+
+  Future<void> _openBookingForDoctor(DoctorRecommendation doctor) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => BookAppointmentScreen(
+          initialDoctorName: doctor.fullName,
+          initialSpecialtyName: doctor.specialtyName.isNotEmpty ? doctor.specialtyName : doctor.specialty,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _startConsultationWithDoctor(DoctorRecommendation doctor) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      ThemeHelper.showErrorSnackBar(context, 'يرجى تسجيل الدخول أولاً');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      final userDataDoc = await _firestore.collection('users').doc(user.uid).get();
+      final userData = userDataDoc.data() ?? <String, dynamic>{};
+      final doctorDoc = await _firestore.collection('users').doc(doctor.doctorId).get();
+      final doctorData = doctorDoc.data() ?? <String, dynamic>{};
+
+      final existingConsultation = await _firestore
+          .collection('consultations')
+          .where('userId', isEqualTo: user.uid)
+          .where('doctorId', isEqualTo: doctor.doctorId)
+          .where('type', isEqualTo: 'instant')
+          .where('isActive', isEqualTo: true)
+          .limit(1)
+          .get();
+
+      String consultationId;
+      if (existingConsultation.docs.isNotEmpty) {
+        consultationId = existingConsultation.docs.first.id;
+        await _firestore.collection('consultations').doc(consultationId).update({
+          'hasNewMessage': false,
+          'newMessageFor': null,
+          'unreadCount.${user.uid}': 0,
+          'seenBy': FieldValue.arrayUnion([user.uid]),
+        });
+      } else {
+        final consultationRef = await _firestore.collection('consultations').add({
+          'type': 'instant',
+          'doctorId': doctor.doctorId,
+          'doctorName': doctor.fullName,
+          'doctorImage': doctor.photoURL ?? doctorData['photoURL'] ?? doctorData['profileImageUrl'],
+          'doctorFcmToken': doctorData['fcmToken'],
+          'userId': user.uid,
+          'userName': userData['fullName'] ?? (user.displayName ?? 'مستخدم'),
+          'userImage': userData['profilePicture'] ?? userData['photoURL'] ?? user.photoURL,
+          'specialty': doctor.specialtyName.isNotEmpty ? doctor.specialtyName : doctor.specialty,
+          'createdAt': FieldValue.serverTimestamp(),
+          'lastMessageTime': FieldValue.serverTimestamp(),
+          'status': 'pending',
+          'isActive': true,
+          'seenBy': [user.uid],
+          'hasNewMessage': false,
+          'newMessageFor': null,
+          'unreadCount': {
+            user.uid: 0,
+            doctor.doctorId: 0,
+          },
+        });
+        consultationId = consultationRef.id;
+      }
+
+      if (!mounted) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => ConsultationScreen(
+            consultationId: consultationId,
+            doctorUid: doctor.doctorId,
+            patientUid: user.uid,
+            doctorName: doctor.fullName,
+            patientName: userData['fullName'] ?? (user.displayName ?? 'مستخدم'),
+            doctorImage: doctor.photoURL ?? doctorData['photoURL'] ?? doctorData['profileImageUrl'] ?? '',
+            userImage: userData['profilePicture'] ?? userData['photoURL'] ?? user.photoURL ?? '',
+            isDoctor: false,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (mounted) ThemeHelper.showErrorSnackBar(context, 'تعذر بدء الاستشارة: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   Widget _buildDoctorsTab(ThemeData theme) {
     if (_recommendedDoctors.isEmpty) {
       return _buildEmptyState(Icons.person_search_rounded, 'لا توجد توصيات بعد', 'أكمل تحليل الأعراض لرؤية الأطباء المناسبين');
@@ -546,11 +640,28 @@ class _HealthAssessmentScreenState extends State<HealthAssessmentScreen>
                 children: doctor.reasonsForRecommendation.map((reason) => Chip(label: Text(reason), visualDensity: VisualDensity.compact)).toList(),
               ),
               const SizedBox(height: 14),
-              ElevatedButton.icon(
-                onPressed: () => ThemeHelper.showSuccessSnackBar(context, 'سيتم فتح الحجز أو الاستشارة لهذا الطبيب'),
-                icon: const Icon(Icons.calendar_month_rounded),
-                label: const Text('حجز أو بدء استشارة'),
-                style: ElevatedButton.styleFrom(backgroundColor: MedicalTheme.primaryMedicalBlue, foregroundColor: Colors.white),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => _openBookingForDoctor(doctor),
+                      icon: const Icon(Icons.calendar_month_rounded),
+                      label: const Text('حجز موعد'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.primary,
+                        foregroundColor: theme.colorScheme.onPrimary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _startConsultationWithDoctor(doctor),
+                      icon: const Icon(Icons.chat_bubble_rounded),
+                      label: const Text('بدء استشارة'),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

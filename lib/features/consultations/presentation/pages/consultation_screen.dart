@@ -15,6 +15,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'dart:convert';
 import 'dart:io';
 import '../../../../core/config/medical_theme.dart';
+import '../../../../core/widgets/premium_ui.dart';
 import '../widgets/message_reactions_widget.dart';
 import '../../services/message_reactions_service.dart';
 
@@ -1322,13 +1323,14 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
   }
 
   Widget _buildMessageInput(ThemeData theme, bool isDarkMode) {
+    final colorScheme = theme.colorScheme;
     final borderRadius = BorderRadius.circular(30);
     final canSend = _messageController.text.trim().isNotEmpty || selectedMedia != null;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 14),
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.grey[900] : Colors.white,
+        color: colorScheme.surface.withOpacity(isDarkMode ? .92 : .98),
         border: Border(
           top: BorderSide(
             color: theme.dividerColor.withOpacity(0.1),
@@ -1337,7 +1339,7 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: colorScheme.shadow.withOpacity(0.08),
             blurRadius: 6,
             offset: const Offset(0, -2),
           ),
@@ -1356,11 +1358,11 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
               Container(
                 margin: const EdgeInsets.only(right: 8, bottom: 2),
                 decoration: BoxDecoration(
-                  color: isDarkMode ? Colors.grey[850] : Colors.grey[100],
+                  color: Color.lerp(colorScheme.primaryContainer, colorScheme.secondaryContainer, .35)!.withOpacity(isDarkMode ? .36 : .72),
                   borderRadius: BorderRadius.circular(40),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
+                      color: colorScheme.shadow.withOpacity(0.08),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
@@ -1371,11 +1373,11 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
                   child: InkWell(
                     onTap: () => _showAttachmentMenu(context),
                     borderRadius: BorderRadius.circular(40),
-                    child: const Padding(
-                      padding: EdgeInsets.all(8.0),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
                       child: Icon(
                         Icons.attach_file_rounded,
-                        color: Color(0xFF2E5CB8),
+                        color: colorScheme.primary,
                         size: 24,
                       ),
                     ),
@@ -1390,11 +1392,11 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
-                    color: isDarkMode ? Colors.grey[850] : Colors.grey[100],
+                    color: Color.lerp(colorScheme.primaryContainer, colorScheme.secondaryContainer, .35)!.withOpacity(isDarkMode ? .36 : .72),
                     borderRadius: borderRadius,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
+                        color: colorScheme.shadow.withOpacity(0.08),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -1422,7 +1424,7 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
                             ),
                           ),
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: isDarkMode ? Colors.white : Colors.black87,
+                            color: colorScheme.onSurface,
                           ),
                           onChanged: (value) {
                             setState(() {}); // تحديث لتغيير حالة الزر
@@ -1458,7 +1460,7 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
                             ),
                           )
                               : Material(
-                            color: canSend ? theme.primaryColor : theme.disabledColor.withOpacity(0.5),
+                            color: canSend ? colorScheme.primary : Color.lerp(colorScheme.primaryContainer, colorScheme.secondaryContainer, .35)!,
                             borderRadius: BorderRadius.circular(20),
                             child: InkWell(
                               key: const ValueKey("send_button"),
@@ -1481,7 +1483,7 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
                           decoration: BoxDecoration(
                             color: _isRecording
                                 ? theme.colorScheme.error.withOpacity(0.15)
-                                : Colors.blue.withOpacity(0.12),
+                                : colorScheme.primary.withOpacity(0.12),
                             shape: BoxShape.circle,
                           ),
                           child: IconButton(
@@ -1489,7 +1491,7 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
                             tooltip: _isRecording ? 'إيقاف وإرفاق التسجيل' : 'تسجيل صوتي',
                             icon: Icon(
                               _isRecording ? Icons.stop_circle_rounded : Icons.mic_rounded,
-                              color: _isRecording ? theme.colorScheme.error : Colors.blue,
+                              color: _isRecording ? colorScheme.error : colorScheme.primary,
                             ),
                           ),
                         ),
@@ -1691,7 +1693,7 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
-              color: isDarkMode ? Colors.grey[850] : Colors.grey[100],
+              color: Color.lerp(colorScheme.primaryContainer, colorScheme.secondaryContainer, .35)!.withOpacity(isDarkMode ? .36 : .72),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Column(
@@ -1932,8 +1934,8 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
                                   : isMe
                                   ? them.primary
                                   : isDarkMode
-                                  ? Colors.grey[800]
-                                  : Colors.white,
+                                  ? Color.lerp(theme.colorScheme.primaryContainer, theme.colorScheme.secondaryContainer, .35)!
+                                  : theme.colorScheme.surface,
                               borderRadius: BorderRadius.only(
                                 topLeft: const Radius.circular(18),
                                 topRight: const Radius.circular(18),
@@ -1943,7 +1945,7 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
                               boxShadow: [
                                 if (!isDarkMode && !isMe)
                                   BoxShadow(
-                                    color: Colors.grey.withOpacity(0.15),
+                                    color: theme.colorScheme.shadow.withOpacity(0.10),
                                     spreadRadius: 1,
                                     blurRadius: 4,
                                     offset: const Offset(0, 2),
@@ -2073,9 +2075,9 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
     final userImageUrl = getUserImageUrl(userData);
 
     return AppBar(
-      backgroundColor: isDarkMode ? Colors.grey[900] : Colors.white,
-      elevation: 1,
-      iconTheme: IconThemeData(color: isDarkMode ? Colors.white : Colors.blue),
+      backgroundColor: theme.colorScheme.surface.withOpacity(isDarkMode ? .92 : .98),
+      elevation: 0,
+      iconTheme: IconThemeData(color: theme.colorScheme.primary),
       titleSpacing: 0,
       title: InkWell(
         onTap: () => _showUserInfoDialog(context),
@@ -2144,7 +2146,7 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
                             ? 'آخر ظهور ${DateFormat('hh:mm a', 'ar').format(lastSeenTime)}'
                             : '',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: isOnline ? Colors.green : theme.disabledColor,
+                          color: isOnline ? theme.colorScheme.secondary : theme.disabledColor,
                         ),
                       ),
                     ],
@@ -2254,13 +2256,12 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
 
     return Scaffold(
       appBar: _buildAppBar(theme, isDarkMode),
-      body: Column(
+      body: PremiumGradientBackground(
+        child: Column(
         children: [
           Expanded(
             child: Container(
-              decoration: BoxDecoration(
-                color: isDarkMode ? Colors.grey[900] : Colors.grey[50],
-              ),
+              decoration: const BoxDecoration(),
               child: StreamBuilder<QuerySnapshot>(
                 stream: _firestore
                     .collection('consultations')
@@ -2304,6 +2305,7 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
           _buildMessageInput(theme, isDarkMode),
         ],
       ),
+      ),
     );
   }
 
@@ -2322,7 +2324,7 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
       child: ListView.builder(
         controller: _scrollController,
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+        padding: const EdgeInsets.fromLTRB(12, 16, 12, 24),
         itemCount: docs.length + (_isLoadingMore ? 1 : 0),
         itemBuilder: (context, index) {
           if (index == docs.length) {

@@ -1,118 +1,101 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
-/// 🎨 Bottom Navigation Bar حديث مع Animations
-/// يتميز بتصميم عصري وحركات ناعمة وإبراز الأيقونة النشطة
+/// Bottom Navigation Bar فاخر عائم مع انحناءة وسطية وأيقونة مركزية طافية.
 class ModernBottomNavBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
   final List<BottomNavItem> items;
 
   const ModernBottomNavBar({
-    Key? key,
+    super.key,
     required this.currentIndex,
     required this.onTap,
     required this.items,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    return Container(
-      // ✅ ظل علوي لإضفاء عمق
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: theme.shadowColor.withOpacity(0.12),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-        child: BottomAppBar(
-          elevation: 0,
-          color: colorScheme.surface,
-          shape: const CircularNotchedRectangle(),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(
-                items.length,
-                    (index) => _buildNavItem(
-                  context: context,
-                  index: index,
-                  isActive: index == currentIndex,
-                  item: items[index],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+    final scheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final centerIndex = items.isEmpty ? 0 : items.length ~/ 2;
 
-  /// ✅ بناء عنصر الملاح الواحد
-  Widget _buildNavItem({
-    required BuildContext context,
-    required int index,
-    required bool isActive,
-    required BottomNavItem item,
-  }) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final onSurfaceVariant = colorScheme.onSurfaceVariant;
-    return GestureDetector(
-      onTap: () => onTap(index),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        padding: EdgeInsets.symmetric(
-          horizontal: isActive ? 20 : 12,
-          vertical: 8,
-        ),
-        decoration: BoxDecoration(
-          color: isActive
-              ? colorScheme.primary.withOpacity(0.12)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
+    return SafeArea(
+      minimum: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      child: SizedBox(
+        height: 96,
+        child: Stack(
+          alignment: Alignment.topCenter,
+          clipBehavior: Clip.none,
           children: [
-            // ✅ الأيقونة
-            AnimatedSize(
-              duration: const Duration(milliseconds: 300),
-              child: Icon(
-                item.icon,
-                color: isActive
-                    ? colorScheme.primary
-                    : onSurfaceVariant.withOpacity(0.7),
-                size: isActive ? 26 : 24,
-              ),
-            ),
-
-            // ✅ التسميات (تظهر فقط للعنصر النشط)
-            if (isActive) ...[
-              const SizedBox(width: 8),
-              AnimatedOpacity(
-                opacity: isActive ? 1 : 0,
-                duration: const Duration(milliseconds: 300),
-                child: Text(
-                  item.label,
-                  style: TextStyle(
-                    color: colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
+            Positioned.fill(
+              top: 18,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(34),
+                  boxShadow: [
+                    BoxShadow(
+                      color: scheme.shadow.withOpacity(isDark ? .32 : .16),
+                      blurRadius: 36,
+                      offset: const Offset(0, 18),
+                    ),
+                    BoxShadow(
+                      color: scheme.primary.withOpacity(isDark ? .24 : .16),
+                      blurRadius: 32,
+                      offset: const Offset(0, 12),
+                    ),
+                  ],
+                ),
+                child: ClipPath(
+                  clipper: _FloatingNavClipper(),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(10, 18, 10, 8),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            scheme.primary.withOpacity(isDark ? .20 : .10),
+                            scheme.surface.withOpacity(isDark ? .76 : .92),
+                            scheme.secondary.withOpacity(isDark ? .14 : .08),
+                          ],
+                        ),
+                        border: Border.all(
+                          color: scheme.primary.withOpacity(isDark ? .18 : .14),
+                        ),
+                      ),
+                      child: Row(
+                        children: List.generate(items.length, (index) {
+                          if (index == centerIndex) {
+                            return const Expanded(child: SizedBox.shrink());
+                          }
+                          return Expanded(
+                            child: _NavPill(
+                              item: items[index],
+                              isActive: index == currentIndex,
+                              onTap: () => onTap(index),
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ],
+            ),
+            if (items.isNotEmpty)
+              Positioned(
+                top: 0,
+                child: _FloatingCenterAction(
+                  item: items[centerIndex],
+                  isActive: centerIndex == currentIndex,
+                  onTap: () => onTap(centerIndex),
+                ),
+              ),
           ],
         ),
       ),
@@ -120,233 +103,253 @@ class ModernBottomNavBar extends StatelessWidget {
   }
 }
 
-/// 📋 نموذج عنصر الملاح
+class _FloatingNavClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    final center = size.width / 2;
+    const notchWidth = 94.0;
+    const notchDepth = 28.0;
+    const radius = 34.0;
+
+    path.moveTo(radius, 0);
+    path.lineTo(center - notchWidth / 2, 0);
+    path.cubicTo(
+      center - 36,
+      0,
+      center - 34,
+      notchDepth,
+      center,
+      notchDepth,
+    );
+    path.cubicTo(
+      center + 34,
+      notchDepth,
+      center + 36,
+      0,
+      center + notchWidth / 2,
+      0,
+    );
+    path.lineTo(size.width - radius, 0);
+    path.quadraticBezierTo(size.width, 0, size.width, radius);
+    path.lineTo(size.width, size.height - radius);
+    path.quadraticBezierTo(size.width, size.height, size.width - radius, size.height);
+    path.lineTo(radius, size.height);
+    path.quadraticBezierTo(0, size.height, 0, size.height - radius);
+    path.lineTo(0, radius);
+    path.quadraticBezierTo(0, 0, radius, 0);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+}
+
+class _FloatingCenterAction extends StatelessWidget {
+  final BottomNavItem item;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _FloatingCenterAction({
+    required this.item,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Semantics(
+      selected: isActive,
+      button: true,
+      label: item.label,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedScale(
+          scale: isActive ? 1.08 : 1,
+          duration: const Duration(milliseconds: 280),
+          curve: Curves.easeOutBack,
+          child: Container(
+            width: 70,
+            height: 70,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  scheme.primary,
+                  Color.lerp(scheme.primary, scheme.secondary, .55)!,
+                ],
+              ),
+              border: Border.all(color: scheme.onPrimary.withOpacity(.26), width: 1.4),
+              boxShadow: [
+                BoxShadow(
+                  color: scheme.primary.withOpacity(isActive ? .42 : .28),
+                  blurRadius: isActive ? 34 : 26,
+                  offset: const Offset(0, 14),
+                ),
+                BoxShadow(
+                  color: scheme.secondary.withOpacity(.18),
+                  blurRadius: 22,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(item.icon, color: scheme.onPrimary, size: 28),
+                const SizedBox(height: 2),
+                Text(
+                  item.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: scheme.onPrimary,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 9,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavPill extends StatelessWidget {
+  final BottomNavItem item;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _NavPill({
+    required this.item,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final activeColor = scheme.primary;
+    final inactiveColor = scheme.onSurfaceVariant;
+
+    return Semantics(
+      selected: isActive,
+      button: true,
+      label: item.label,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 360),
+          curve: Curves.easeOutCubic,
+          margin: const EdgeInsets.symmetric(horizontal: 3),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            gradient: isActive
+                ? LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      activeColor.withOpacity(.20),
+                      scheme.secondary.withOpacity(.10),
+                    ],
+                  )
+                : null,
+            border: Border.all(
+              color: isActive ? activeColor.withOpacity(.26) : Colors.transparent,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedScale(
+                scale: isActive ? 1.08 : 1,
+                duration: const Duration(milliseconds: 260),
+                curve: Curves.easeOutBack,
+                child: Icon(
+                  item.icon,
+                  color: isActive ? activeColor : inactiveColor.withOpacity(.78),
+                  size: isActive ? 25 : 23,
+                ),
+              ),
+              const SizedBox(height: 4),
+              AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 260),
+                style: theme.textTheme.labelSmall!.copyWith(
+                  color: isActive ? activeColor : inactiveColor.withOpacity(.78),
+                  fontWeight: isActive ? FontWeight.w900 : FontWeight.w600,
+                  fontSize: isActive ? 11 : 10,
+                ),
+                child: Text(
+                  item.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(height: 3),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOutCubic,
+                width: isActive ? 22 : 4,
+                height: 3,
+                decoration: BoxDecoration(
+                  color: isActive ? activeColor : Colors.transparent,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class BottomNavItem {
   final String label;
   final IconData icon;
 
-  BottomNavItem({
+  const BottomNavItem({
     required this.label,
     required this.icon,
   });
 }
 
-/// 🎨 Bottom Navigation Bar بديل - نسخة متقدمة جداً
-class AdvancedBottomNavBar extends StatefulWidget {
-  final int currentIndex;
-  final Function(int) onTap;
-  final List<BottomNavItem> items;
-
+class AdvancedBottomNavBar extends ModernBottomNavBar {
   const AdvancedBottomNavBar({
-    Key? key,
-    required this.currentIndex,
-    required this.onTap,
-    required this.items,
-  }) : super(key: key);
-
-  @override
-  State<AdvancedBottomNavBar> createState() => _AdvancedBottomNavBarState();
+    super.key,
+    required super.currentIndex,
+    required super.onTap,
+    required super.items,
+  });
 }
 
-class _AdvancedBottomNavBarState extends State<AdvancedBottomNavBar>
-    with TickerProviderStateMixin {
-  late List<AnimationController> _animationControllers;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationControllers = List.generate(
-      widget.items.length,
-          (index) => AnimationController(
-        duration: const Duration(milliseconds: 600),
-        vsync: this,
-      ),
-    );
-    _animationControllers[widget.currentIndex].forward();
-  }
-
-  @override
-  void didUpdateWidget(AdvancedBottomNavBar oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.currentIndex != widget.currentIndex) {
-      _animationControllers[oldWidget.currentIndex].reverse();
-      _animationControllers[widget.currentIndex].forward();
-    }
-  }
-
-  @override
-  void dispose() {
-    for (var controller in _animationControllers) {
-      controller.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    return Container(
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: theme.shadowColor.withOpacity(0.15),
-            blurRadius: 20,
-            offset: const Offset(0, -5),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(25),
-          topRight: Radius.circular(25),
-        ),
-        child: BottomAppBar(
-          elevation: 0,
-          color: colorScheme.surface,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(
-                widget.items.length,
-                    (index) => _buildAdvancedNavItem(
-                  context: context,
-                  index: index,
-                  isActive: index == widget.currentIndex,
-                  controller: _animationControllers[index],
-                  item: widget.items[index],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// ✅ عنصر الملاح المتقدم مع Animations
-  Widget _buildAdvancedNavItem({
-    required BuildContext context,
-    required int index,
-    required bool isActive,
-    required AnimationController controller,
-    required BottomNavItem item,
-  }) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final onSurfaceVariant = colorScheme.onSurfaceVariant;
-    return GestureDetector(
-      onTap: () => widget.onTap(index),
-      child: ScaleTransition(
-        scale: Tween<double>(begin: 0.8, end: 1).animate(
-          CurvedAnimation(parent: controller, curve: Curves.elasticOut),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // ✅ الأيقونة مع تأثير لوني
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: isActive
-                    ? colorScheme.primary.withOpacity(0.18)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(12),
-                border: isActive
-                    ? Border.all(
-                  color: colorScheme.primary.withOpacity(0.45),
-                  width: 2,
-                )
-                    : null,
-              ),
-              child: Icon(
-                item.icon,
-                color: isActive
-                    ? colorScheme.primary
-                    : onSurfaceVariant.withOpacity(0.75),
-                size: isActive ? 28 : 24,
-              ),
-            ),
-            const SizedBox(height: 4),
-            // ✅ التسميات مع تأثير الفيد
-            AnimatedOpacity(
-              opacity: isActive ? 1 : 0.6,
-              duration: const Duration(milliseconds: 300),
-              child: Text(
-                item.label,
-                style: TextStyle(
-                  color: isActive
-                      ? colorScheme.primary
-                      : onSurfaceVariant.withOpacity(0.8),
-                  fontWeight: isActive
-                      ? FontWeight.bold
-                      : FontWeight.normal,
-                  fontSize: 10,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            if (isActive) ...[
-              const SizedBox(height: 2),
-              // ✅ مؤشر النشاط
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                width: 30,
-                height: 3,
-                decoration: BoxDecoration(
-                  color: colorScheme.primary,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// 🎨 Bottom Navigation Bar بسيط وأنيق
 class SimpleBottomNavBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
   final List<BottomNavItem> items;
 
   const SimpleBottomNavBar({
-    Key? key,
+    super.key,
     required this.currentIndex,
     required this.onTap,
     required this.items,
-  }) : super(key: key);
+  });
 
   @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final onSurfaceVariant = colorScheme.onSurfaceVariant;
-    return BottomNavigationBar(
-      currentIndex: currentIndex,
-      onTap: onTap,
-      type: BottomNavigationBarType.fixed,
-      elevation: 20,
-      backgroundColor: colorScheme.surface,
-      selectedItemColor: colorScheme.primary,
-      unselectedItemColor: onSurfaceVariant.withOpacity(0.75),
-      selectedLabelStyle: const TextStyle(
-        fontWeight: FontWeight.bold,
-        fontSize: 12,
-      ),
-      unselectedLabelStyle: const TextStyle(
-        fontSize: 12,
-      ),
-      items: items
-          .map(
-            (item) => BottomNavigationBarItem(
-          icon: Icon(item.icon),
-          label: item.label,
-        ),
-      )
-          .toList(),
-    );
-  }
+  Widget build(BuildContext context) => ModernBottomNavBar(
+        currentIndex: currentIndex,
+        onTap: onTap,
+        items: items,
+      );
 }
