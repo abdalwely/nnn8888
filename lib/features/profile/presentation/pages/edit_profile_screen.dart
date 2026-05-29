@@ -36,7 +36,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Color get _background => Theme.of(context).scaffoldBackgroundColor;
   Color get _primary => Theme.of(context).colorScheme.primary;
   Color get _text => Theme.of(context).colorScheme.onSurface;
-  Color get _muted => Theme.of(context).colorScheme.onSurfaceVariant;
+  Color get _muted => Theme.of(context).colorScheme.onSurface.withOpacity(.64);
   Color get _border => Theme.of(context).dividerColor.withOpacity(0.35);
 
   @override

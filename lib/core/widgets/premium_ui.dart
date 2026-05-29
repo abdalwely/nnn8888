@@ -159,7 +159,7 @@ class PremiumSectionHeader extends StatelessWidget {
                 Text(
                   subtitle!,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
+                    color: scheme.onSurface.withOpacity(.64),
                   ),
                 ),
               ],
@@ -229,13 +229,13 @@ class PremiumIconTile extends StatelessWidget {
                       Text(
                         subtitle!,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: scheme.onSurfaceVariant,
+                          color: scheme.onSurface.withOpacity(.64),
                         ),
                       ),
                   ],
                 ),
               ),
-              trailing ?? Icon(Icons.arrow_forward_ios_rounded, size: 16, color: scheme.onSurfaceVariant),
+              trailing ?? Icon(Icons.arrow_forward_ios_rounded, size: 16, color: scheme.onSurface.withOpacity(.64)),
             ],
           ),
         ),

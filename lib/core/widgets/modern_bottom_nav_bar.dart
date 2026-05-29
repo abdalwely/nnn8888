@@ -239,7 +239,7 @@ class _NavPill extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final activeColor = scheme.primary;
-    final inactiveColor = scheme.onSurfaceVariant;
+    final inactiveColor = scheme.onSurface.withOpacity(.64);
 
     return Semantics(
       selected: isActive,

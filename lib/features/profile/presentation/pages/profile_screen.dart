@@ -25,7 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Color get _primary => Theme.of(context).colorScheme.primary;
   Color get _primaryDark => Theme.of(context).colorScheme.primary.withOpacity(0.85);
   Color get _text => Theme.of(context).colorScheme.onSurface;
-  Color get _muted => Theme.of(context).colorScheme.onSurfaceVariant;
+  Color get _muted => Theme.of(context).colorScheme.onSurface.withOpacity(.64);
   Color get _cardBorder => Theme.of(context).dividerColor.withOpacity(0.35);
   Color get _profileCardColor => Theme.of(context).cardColor;
 

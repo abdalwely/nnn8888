@@ -1507,7 +1507,8 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
   }
 
   Widget _buildMessage(DocumentSnapshot doc, ThemeData theme, bool isDarkMode) {
-    final them = Theme.of(context).colorScheme;
+    final colorScheme = theme.colorScheme;
+    final them = colorScheme;
     final msg = doc.data() as Map<String, dynamic>;
     final msgId = doc.id;
     final isMe = msg['senderId'] == _auth.currentUser?.uid;

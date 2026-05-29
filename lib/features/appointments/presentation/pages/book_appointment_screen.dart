@@ -589,7 +589,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                   Text(doctor['fullName'],
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface)),
                   Text(doctor['specialtyName'] ?? '',
-                      style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
+                      style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(.64))),
                   const SizedBox(height: 4),
                   if (doctor['rating'] != null)
                     Row(
@@ -601,7 +601,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                   if (doctor['specialty'] != null)
                     Text(
                       doctor['specialty'],
-                      style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
+                      style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface.withOpacity(.64)),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),

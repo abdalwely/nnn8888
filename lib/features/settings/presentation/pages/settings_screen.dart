@@ -675,9 +675,9 @@ class _SettingsScreenState extends State<SettingsScreen>
             children: [
               Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(.64),
                 ),
               ),
               const SizedBox(height: 4),

@@ -342,7 +342,7 @@ class _MedicationsScreenState extends State<MedicationsScreen> {
   Widget _miniChip(String text, IconData icon, Color color) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: [Icon(icon, size: 14, color: color), const SizedBox(width: 4), Text(text, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12))],
+      children: [Icon(icon, size: 14, color: color), const SizedBox(width: 4), Text(text, style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(.64), fontSize: 12))],
     );
   }
 
@@ -352,7 +352,7 @@ class _MedicationsScreenState extends State<MedicationsScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 86, child: Text(label, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontWeight: FontWeight.w700))),
+          SizedBox(width: 86, child: Text(label, style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(.64), fontWeight: FontWeight.w700))),
           Expanded(child: Text(value.toString(), style: TextStyle(color: valueColor ?? Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w700))),
         ],
       ),
@@ -367,7 +367,7 @@ class _MedicationsScreenState extends State<MedicationsScreen> {
         children: [
           Icon(Icons.medication_outlined, size: 72, color: colorScheme.primary.withOpacity(0.45)),
           const SizedBox(height: 12),
-          Text(message, textAlign: TextAlign.center, style: TextStyle(color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w700)),
+          Text(message, textAlign: TextAlign.center, style: TextStyle(color: colorScheme.onSurface.withOpacity(.64), fontWeight: FontWeight.w700)),
         ],
       ),
     );
