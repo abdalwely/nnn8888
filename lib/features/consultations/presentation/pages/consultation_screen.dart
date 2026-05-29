@@ -1358,7 +1358,7 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
               Container(
                 margin: const EdgeInsets.only(right: 8, bottom: 2),
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest.withOpacity(isDarkMode ? .58 : .78),
+                  color: Color.lerp(colorScheme.primaryContainer, colorScheme.secondaryContainer, .35)!.withOpacity(isDarkMode ? .36 : .72),
                   borderRadius: BorderRadius.circular(40),
                   boxShadow: [
                     BoxShadow(
@@ -1392,7 +1392,7 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest.withOpacity(isDarkMode ? .58 : .78),
+                    color: Color.lerp(colorScheme.primaryContainer, colorScheme.secondaryContainer, .35)!.withOpacity(isDarkMode ? .36 : .72),
                     borderRadius: borderRadius,
                     boxShadow: [
                       BoxShadow(
@@ -1460,7 +1460,7 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
                             ),
                           )
                               : Material(
-                            color: canSend ? colorScheme.primary : colorScheme.surfaceContainerHighest,
+                            color: canSend ? colorScheme.primary : Color.lerp(colorScheme.primaryContainer, colorScheme.secondaryContainer, .35)!,
                             borderRadius: BorderRadius.circular(20),
                             child: InkWell(
                               key: const ValueKey("send_button"),
@@ -1693,7 +1693,7 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest.withOpacity(isDarkMode ? .58 : .78),
+              color: Color.lerp(colorScheme.primaryContainer, colorScheme.secondaryContainer, .35)!.withOpacity(isDarkMode ? .36 : .72),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Column(
@@ -1934,7 +1934,7 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
                                   : isMe
                                   ? them.primary
                                   : isDarkMode
-                                  ? theme.colorScheme.surfaceContainerHighest
+                                  ? Color.lerp(theme.colorScheme.primaryContainer, theme.colorScheme.secondaryContainer, .35)!
                                   : theme.colorScheme.surface,
                               borderRadius: BorderRadius.only(
                                 topLeft: const Radius.circular(18),

@@ -237,7 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               margin: const EdgeInsetsDirectional.only(end: 8, top: 6, bottom: 6),
               decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest.withOpacity(0.72),
+                color: Color.lerp(colorScheme.primaryContainer, colorScheme.secondaryContainer, .35)!.withOpacity(0.78),
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.35)),
                 boxShadow: [

@@ -6,7 +6,14 @@ import '../../../../core/widgets/premium_ui.dart';
 import '../../../home/presentation/pages/home_screen.dart';
 
 class BookAppointmentScreen extends StatefulWidget {
-  const BookAppointmentScreen({super.key});
+  final String? initialDoctorName;
+  final String? initialSpecialtyName;
+
+  const BookAppointmentScreen({
+    super.key,
+    this.initialDoctorName,
+    this.initialSpecialtyName,
+  });
 
   @override
   State<BookAppointmentScreen> createState() => _BookAppointmentScreenState();
@@ -55,9 +62,30 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
         .where('isVerified', isEqualTo: true)
         .get();
 
+    final loadedDoctors = snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+    Map<String, dynamic>? initialDoctor;
+    if (widget.initialDoctorName != null) {
+      for (final doctor in loadedDoctors) {
+        if (doctor['fullName']?.toString() == widget.initialDoctorName) {
+          initialDoctor = doctor;
+          break;
+        }
+      }
+    }
+
     setState(() {
-      _doctors = snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+      _doctors = loadedDoctors;
+      if (initialDoctor != null) {
+        _selectedDoctor = initialDoctor['fullName']?.toString();
+        _selectedSpecialty = widget.initialSpecialtyName ?? initialDoctor['specialtyName']?.toString();
+        _doctorImageUrl = initialDoctor['profileImageUrl']?.toString() ?? initialDoctor['photoURL']?.toString();
+      }
     });
+
+    final doctorId = initialDoctor?['uid']?.toString();
+    if (doctorId != null && doctorId.isNotEmpty) {
+      await _loadDoctorWorkplaces(doctorId);
+    }
   }
 
   Future<void> _loadDoctorWorkplaces(String doctorId) async {

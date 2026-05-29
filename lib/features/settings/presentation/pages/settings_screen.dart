@@ -662,8 +662,8 @@ class _SettingsScreenState extends State<SettingsScreen>
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Theme.of(context).brightness == Brightness.dark
-            ? Theme.of(context).colorScheme.surfaceContainerHighest
-            : Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(.55),
+            ? Color.lerp(Theme.of(context).colorScheme.primaryContainer, Theme.of(context).colorScheme.secondaryContainer, .35)!
+            : Color.lerp(Theme.of(context).colorScheme.primaryContainer, Theme.of(context).colorScheme.secondaryContainer, .35)!.withOpacity(.55),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
